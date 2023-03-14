@@ -29,7 +29,7 @@ SELECT 'Übernehme Bestände...';
 DELETE FROM bestand;
 INSERT INTO bestand(bestdnr,gbbz,gbblnr,anteil,auftlnr,bestfl,ff_entst,ff_stand,pz)
 	SELECT
-		to_char(alkis_toint(land),'fm00') || to_char(alkis_toint(bezirk),'fm0000') || '-' || trim(buchungsblattnummermitbuchstabenerweiterung) AS bestdnr,
+		to_char(alkis_toint(land),'fm00') || '/' || to_char(alkis_toint(bezirk),'fm0000') || '/' || lpad(trim(buchungsblattnummermitbuchstabenerweiterung),7,'0') AS bestdnr,
 		to_char(alkis_toint(bezirk),'fm0000') AS gbbz,
 		buchungsblattnummermitbuchstabenerweiterung AS gbblnr,
 		NULL AS anteil,
