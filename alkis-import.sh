@@ -222,7 +222,7 @@ import() {
 		;;
 	esac
 
-	local pgf="$(dirname $dst)/progress/$(basename $dst)"
+	local pgf="$(dirname "$dst")/progress/$(basename "$dst")"
 
 	echo "RUNNING: ogr2ogr -f $DRIVER $opt $sf_opt -update -append \"$DST\" $CRS \"$dst1\"" | sed -Ee 's/password=\S+/password=*removed*/'
 	ogr2ogr -f $DRIVER $opt $sf_opt -update -append -progress "$DST" $CRS "$dst1" > "$pgf"

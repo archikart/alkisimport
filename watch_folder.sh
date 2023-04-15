@@ -1,8 +1,8 @@
 #!/bin/bash
 
 file_to_wait="$1"
-directory="$(dirname $file_to_wait)"
-filename="$(basename $file_to_wait)"
+directory="$(dirname "$file_to_wait")"
+filename="$(basename "$file_to_wait")"
 
 inotifywait -mq -e create -e modify --format %f "$directory" | 
 while read line
