@@ -17,7 +17,7 @@ CREATE TABLE alkis_klassifizierungen(
 INSERT INTO alkis_klassifizierungen(element, prefix, funktionsfeld, bodenzahl, ackerzahl, enumeration) VALUES
 	('ax_bodenschaetzung',			'b', 'kulturart',		'bodenzahlodergruenlandgrundzahl',	'ackerzahlodergruenlandzahl',	'ax_kulturart_bodenschaetzung'),
 	('ax_musterlandesmusterundvergleichsstueck',			'M', 'kulturart',		'bodenzahlodergruenlandgrundzahl',	'ackerzahlodergruenlandzahl',	'ax_kulturart_musterlandesmusterundvergleichsstueck'),
-	('ax_grablochderbodenschaetzung',			'G', 'bedeutung',		'bodenzahlodergruenlandgrundzahl',	'NULL::varchar',	'ax_bedeutung_grablochderbodenschaetzung'),
+	/*('ax_grablochderbodenschaetzung',			'G', 'bedeutung',		'bodenzahlodergruenlandgrundzahl',	'NULL::varchar',	'ax_bedeutung_grablochderbodenschaetzung'),*/
 	('ax_bewertung',			'B', 'klassifizierung',		'NULL::varchar',			'NULL::varchar',		'ax_klassifizierung_bewertung'),
 	('ax_klassifizierungnachwasserrecht',	'W', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_klassifizierungnachwasserrecht'),
 	('ax_anderefestlegungnachwasserrecht',	'W1', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_anderefestlegungnachwasserrecht'),
