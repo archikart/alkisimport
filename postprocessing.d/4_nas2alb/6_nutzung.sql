@@ -124,7 +124,7 @@ SELECT alkis_dropobject('nutz_shl_pk_seq');
 CREATE SEQUENCE nutz_shl_pk_seq;
 
 DELETE FROM nutz_21;
-INSERT INTO nutz_21(flsnr,pk,nutzsl,gemfl,fl,ff_entst,ff_stand)
+INSERT INTO nutz_21(flsnr,pk,nutzsl,gemfl,fl,ff_entst,ff_stand,nutz_gml_id)
   SELECT
     alkis_flsnr(f) AS flsnr,
     to_hex(nextval('nutz_shl_pk_seq'::regclass)) AS pk,
@@ -132,10 +132,11 @@ INSERT INTO nutz_21(flsnr,pk,nutzsl,gemfl,fl,ff_entst,ff_stand)
      sum(st_area(alkis_intersection(f.wkb_geometry,n.wkb_geometry,'ax_flurstueck:'||f.gml_id||'<=>'||n.name||':'||n.gml_id))) AS gemfl,
     (sum(st_area(alkis_intersection(f.wkb_geometry,n.wkb_geometry,'ax_flurstueck:'||f.gml_id||'<=>'||n.name||':'||n.gml_id))*amtlicheflaeche/NULLIF(st_area(f.wkb_geometry),0)))::int AS fl,
     0 AS ff_entst,
-    0 AS ff_stand
+    0 AS ff_stand,
+	n.gml_id AS nutz_gml_id
   FROM ax_flurstueck f
   JOIN ax_tatsaechlichenutzung n
       ON f.wkb_geometry && n.wkb_geometry
       AND alkis_relate(f.wkb_geometry,n.wkb_geometry,'2********','ax_flurstueck:'||f.gml_id||'<=>'||n.name||':'||n.gml_id)
   WHERE f.endet IS NULL
-  GROUP BY alkis_flsnr(f), f.wkb_geometry, n.nutzung;
+  GROUP BY alkis_flsnr(f), f.wkb_geometry, n.nutzung, n.gml_id;

@@ -20,6 +20,14 @@ INSERT INTO alkis_klassifizierungen(name, kennung, prefix, funktionsfeld, bodenz
 	('ax_bewertung',			'72004', 'B', 'klassifizierung',	'NULL::varchar',			'NULL::varchar',		'ax_klassifizierung_bewertung'),
 	('ax_klassifizierungnachwasserrecht',	'71003', 'W', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_klassifizierungnachwasserrecht'),
 	('ax_klassifizierungnachstrassenrecht',	'71001', 'S', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_klassifizierungnachstrassenrecht');
+	('ax_musterlandesmusterundvergleichsstueck', '72002', 'M', 'kulturart',		'bodenzahlodergruenlandgrundzahl',	'ackerzahlodergruenlandzahl',	'ax_kulturart_musterlandesmusterundvergleichsstueck'),
+	('ax_anderefestlegungnachwasserrecht', '71004', 'W1', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_anderefestlegungnachwasserrecht'),
+	('ax_anderefestlegungnachstrassenrecht', '71002', 'S1', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_anderefestlegungnachstrassenrecht'),
+	('ax_naturumweltoderbodenschutzrecht', '71006', 'BS', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_naturumweltoderbodenschutzrecht'),
+	('ax_bauraumoderbodenordnungsrecht', '71008', 'BO', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_bauraumoderbodenordnungsrecht'),
+	('ax_denkmalschutzrecht', '71009', 'DS', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_denkmalschutzrecht'),
+	('ax_forstrecht', '71010', 'F', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_forstrecht'),
+	('ax_sonstigesrecht', '71011', 'SO', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_sonstigesrecht');
 
 SELECT alkis_dropobject('alkis_createklassifizierung');
 CREATE FUNCTION pg_temp.alkis_createklassifizierung() RETURNS varchar AS $$
@@ -104,7 +112,7 @@ CREATE SEQUENCE klas_3x_pk_seq;
 UPDATE ax_bodenschaetzung SET bodenzahlodergruenlandgrundzahl=NULL WHERE bodenzahlodergruenlandgrundzahl IN ('nicht belegt','');
 
 DELETE FROM klas_3x;
-INSERT INTO klas_3x(flsnr,pk,klf,wertz1,wertz2,gemfl,fl,ff_entst,ff_stand)
+INSERT INTO klas_3x(flsnr,pk,klf,wertz1,wertz2,gemfl,fl,ff_entst,ff_stand,nutz_gml_id)
   SELECT
     alkis_flsnr(f) AS flsnr,
     to_hex(nextval('klas_3x_pk_seq'::regclass)) AS pk,
@@ -114,10 +122,11 @@ INSERT INTO klas_3x(flsnr,pk,klf,wertz1,wertz2,gemfl,fl,ff_entst,ff_stand)
      sum(st_area(alkis_intersection(f.wkb_geometry,k.wkb_geometry,'ax_flurstueck:'||f.gml_id||'<=>'||k.name||':'||k.gml_id))) AS gemfl,
     (sum(st_area(alkis_intersection(f.wkb_geometry,k.wkb_geometry,'ax_flurstueck:'||f.gml_id||'<=>'||k.name||':'||k.gml_id)))*amtlicheflaeche/NULLIF(st_area(f.wkb_geometry),0))::int AS fl,
     0 AS ff_entst,
-    0 AS ff_stand
+    0 AS ff_stand,
+	k.gml_id AS nutz_gml_id
   FROM ax_flurstueck f
   JOIN ax_klassifizierung k
       ON f.wkb_geometry && k.wkb_geometry
       AND alkis_relate(f.wkb_geometry,k.wkb_geometry,'2********','ax_flurstueck:'||f.gml_id||'<=>'||k.name||':'||k.gml_id)
   WHERE f.endet IS NULL
-  GROUP BY alkis_flsnr(f), f.amtlicheflaeche, f.wkb_geometry, k.klassifizierung, k.bodenzahl, k.ackerzahl;
+  GROUP BY alkis_flsnr(f), f.amtlicheflaeche, f.wkb_geometry, k.klassifizierung, k.bodenzahl, k.ackerzahl, k.gml_id;

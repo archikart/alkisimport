@@ -117,7 +117,8 @@ rund() {
 	if [ -d "$dir.d" ]; then
 		for i in $(ls -1d ${dir}.d/* 2>/dev/null | sort); do
 			if [ -d "$i" ]; then
-				ls -1 $i/*.sql 2>/dev/null | sort | parallel --line-buffer --halt soon,fail=1 --jobs=$JOBS sql
+				#ls -1 $i/*.sql 2>/dev/null | sort | parallel --line-buffer --halt soon,fail=1 --jobs=$JOBS sql
+				ls -1 $i/*.sql 2>/dev/null | sort | parallel --line-buffer --halt soon,fail=1 --jobs=-1 sql
 			elif [ -f "$i" -a -r "$i" ]; then
 				sql $i
 			else
@@ -141,7 +142,7 @@ import() {
 
 	t0=$(bdate +%s)
 
-	case ${src,,} in
+	case "${src,,}" in
 	*.zip)
 		dst=${src%.???}.xml
 		dst="$tmpdir/${dst//\//_}"
@@ -230,8 +231,10 @@ import() {
 		return 1
 	fi
 
+	local pgf="$(dirname "$dst")/progress/$(basename "$dst")"
+
 	echo "RUNNING: ogr2ogr -f $DRIVER $opt $sf_opt -update -append \"$DST\" $CRS \"$dst1\"" | sed -Ee 's/password=\S+/password=*removed*/'
-	eval ogr2ogr -f $DRIVER $opt $sf_opt -update -append \"$DST\" $CRS \"$dst1\"
+	ogr2ogr -f $DRIVER $opt $sf_opt -update -append -progress "$DST" $CRS "$dst1" > "$pgf"
 	local r=$?
 	t1=$(bdate +%s)
 
@@ -278,7 +281,8 @@ process() {
 
 		export job
 		export progress
-		parallel --tag --line-buffer --halt soon,fail=1 --jobs=$JOBS import <$job
+		#parallel --tag --line-buffer --halt soon,fail=1 --jobs=$JOBS import <$job
+		parallel --line-buffer --halt soon,fail=1 --jobs=$JOBS import <$job
 		r=$?
 		rm $job
 	fi
@@ -431,7 +435,7 @@ export jobi=0
 rm -f $lock
 while read src
 do
-	case ${src,,} in
+	case "${src,,}" in
 	""|"#"*)
 		# Leerzeilen und Kommentare ignorieren
 		continue
