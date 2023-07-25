@@ -23,6 +23,23 @@ CREATE FUNCTION unnest(anyarray) RETURNS SETOF anyelement AS $$
   SELECT $1[i] FROM generate_series(array_lower($1,1), array_upper($1,1)) i;
 $$ LANGUAGE 'sql' IMMUTABLE;
 
+SET search_path = :"alkis_schema";
+
+CREATE FUNCTION pg_temp.create_min_scale() RETURNS void AS $func$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_proc JOIN pg_namespace ON pronamespace=pg_namespace.oid AND nspname='pg_catalog' WHERE proname='min_scale') THEN
+    PERFORM alkis_dropobject('min_scale');
+    EXECUTE '
+CREATE FUNCTION min_scale(numeric) RETURNS integer AS $sql$
+  SELECT coalesce(min(i),20) FROM generate_series(0, 19) i WHERE ($1*power(10::numeric,i))::numeric=trunc($1*power(10::numeric,i))::numeric;
+$sql$ LANGUAGE ''sql'' IMMUTABLE;
+';
+  END IF;
+END;
+$func$ LANGUAGE 'plpgsql';
+
+SELECT pg_temp.create_min_scale();
+
 SET search_path = :"postgis_schema", :"parent_schema", public;
 
 CREATE FUNCTION st_snaptogrid(geometry,float8,float8) RETURNS geometry AS $$
@@ -373,28 +390,12 @@ CREATE FUNCTION st_offsetcurve(geometry,float8,text) RETURNS geometry AS $$
   SELECT alkis_offsetcurve($1,$2,$3);
 $$ LANGUAGE 'sql' IMMUTABLE;
 
-CREATE FUNCTION force_2d(geometry) RETURNS geometry AS $$
-  SELECT st_force_2d($1);
-$$ LANGUAGE 'sql' IMMUTABLE;
-
-CREATE FUNCTION force_collection(geometry) RETURNS geometry AS $$
-  SELECT st_force_collection($1);
-$$ LANGUAGE 'sql' IMMUTABLE;
-
 CREATE FUNCTION st_force_collection(geometry) RETURNS geometry AS $$
   SELECT force_collection($1);
 $$ LANGUAGE 'sql' IMMUTABLE;
 
-CREATE FUNCTION asbinary(geometry,text) RETURNS bytea AS $$
-  SELECT st_asbinary($1,$2);
-$$ LANGUAGE 'sql' IMMUTABLE;
-
 CREATE FUNCTION st_asbinary(geometry,text) RETURNS bytea AS $$
   SELECT asbinary($1,$2);
-$$ LANGUAGE 'sql' IMMUTABLE;
-
-CREATE FUNCTION setsrid(geometry,integer) RETURNS geometry AS $$
-  SELECT st_setsrid($1,$2);
 $$ LANGUAGE 'sql' IMMUTABLE;
 
 CREATE FUNCTION st_ndims(geometry) RETURNS smallint AS $$
