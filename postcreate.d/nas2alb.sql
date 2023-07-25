@@ -97,7 +97,7 @@ CREATE INDEX str_shl_idx1 ON str_shl(gemshl);
 
 SELECT alkis_dropobject('strassen');
 CREATE TABLE strassen (
-	flsnr character(22),
+	flsnr character(21),
 	pk character(8) NOT NULL,
 	strshl character(32),
 	hausnr varchar,
@@ -138,7 +138,7 @@ CREATE INDEX gema_shl_ag_shl ON gema_shl(ag_shl);
 
 SELECT alkis_dropobject('eignerart');
 CREATE TABLE eignerart (
-	flsnr character(22) NOT NULL,
+	flsnr character(21) NOT NULL,
 	bestdnr character(16) NOT NULL,
 	bvnr character(4) NOT NULL,
 	b character(4),
@@ -276,7 +276,7 @@ CREATE INDEX sonderbaurecht_idx1 ON sonderbaurecht(bestdnr);
 
 SELECT alkis_dropobject('klas_3x');
 CREATE TABLE klas_3x (
-	flsnr character(22),
+	flsnr character(21),
 	pk character(8) NOT NULL,
 	klf character(32),
 	fl character(16),
@@ -308,7 +308,7 @@ COMMENT ON TABLE kls_shl IS 'BASE: Klassifiziersschlüssel';
 
 SELECT alkis_dropobject('bem_fls');
 CREATE TABLE bem_fls (
-	flsnr character(22) NOT NULL,
+	flsnr character(21) NOT NULL,
 	lnr character(2) NOT NULL,
 	text character(52),
 	ff_entst INTEGER NOT NULL ,

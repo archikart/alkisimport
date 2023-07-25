@@ -17,15 +17,12 @@ CREATE TABLE alkis_klassifizierungen(
 INSERT INTO alkis_klassifizierungen(element, prefix, funktionsfeld, bodenzahl, ackerzahl, enumeration) VALUES
 	('ax_bodenschaetzung',			'b', 'kulturart',		'bodenzahlodergruenlandgrundzahl',	'ackerzahlodergruenlandzahl',	'ax_kulturart_bodenschaetzung'),
 	('ax_musterlandesmusterundvergleichsstueck',			'M', 'kulturart',		'bodenzahlodergruenlandgrundzahl',	'ackerzahlodergruenlandzahl',	'ax_kulturart_musterlandesmusterundvergleichsstueck'),
-	/*('ax_grablochderbodenschaetzung',			'G', 'bedeutung',		'bodenzahlodergruenlandgrundzahl',	'NULL::varchar',	'ax_bedeutung_grablochderbodenschaetzung'),*/
 	('ax_bewertung',			'B', 'klassifizierung',		'NULL::varchar',			'NULL::varchar',		'ax_klassifizierung_bewertung'),
 	('ax_klassifizierungnachwasserrecht',	'W', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_klassifizierungnachwasserrecht'),
 	('ax_anderefestlegungnachwasserrecht',	'W1', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_anderefestlegungnachwasserrecht'),
-	/*('ax_schutzgebietnachwasserrecht',	'W2', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_schutzgebietnachwasserrecht'),*/
 	('ax_klassifizierungnachstrassenrecht',	'S', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_klassifizierungnachstrassenrecht'),
 	('ax_anderefestlegungnachstrassenrecht',	'S1', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_anderefestlegungnachstrassenrecht'),
 	('ax_naturumweltoderbodenschutzrecht',	'BS', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_naturumweltoderbodenschutzrecht'),
-	/*('ax_schutzgebietnachnaturumweltoderbodenschutzrecht',	'BS', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_schutzgebietnachnaturumweltoderbodensc'),*/	
 	('ax_bauraumoderbodenordnungsrecht',	'BO', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_bauraumoderbodenordnungsrecht'),
 	('ax_denkmalschutzrecht',	'DS', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_denkmalschutzrecht'),
 	('ax_forstrecht',	'F', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_forstrecht'),
