@@ -231,10 +231,10 @@ import() {
 		return 1
 	fi
 
-	local pgf="$(dirname "$dst")/progress/$(basename "$dst")"
+	local pgf="$(dirname "$dst1")/progress/$(basename "$dst1")"
 
-	echo "RUNNING: ogr2ogr -f $DRIVER $opt $sf_opt -update -append \"$DST\" $CRS \"$dst1\"" | sed -Ee 's/password=\S+/password=*removed*/'
-	ogr2ogr -f $DRIVER $opt $sf_opt -update -append -progress "$DST" $CRS "$dst1" > "$pgf"
+	echo "RUNNING: ogr2ogr -f $DRIVER $opt $sf_opt -update -append -progress \"$DST\" $CRS \"$dst1\"" | sed -Ee 's/password=\S+/password=*removed*/'
+	eval ogr2ogr -f $DRIVER $opt $sf_opt -update -append -progress \"$DST\" $CRS \"$dst1\" \> \"$pgf\"
 	local r=$?
 	t1=$(bdate +%s)
 
