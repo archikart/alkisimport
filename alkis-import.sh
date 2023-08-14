@@ -222,15 +222,7 @@ import() {
 		;;
 	esac
 
-	if ffdate=$(python3 $B/ffdate.py "$dst1"); then
-		opt="$opt -doo \"PRELUDE_STATEMENTS=CREATE TEMPORARY TABLE deletedate AS SELECT '$ffdate'::character(20) AS endet\""
-	elif (( $? == 2 )); then
-		:
-	else
-		echo "Konnte Portionsdatum nicht bestimmen"
-		return 1
-	fi
-
+	opt="$opt -doo \"PRELUDE_STATEMENTS=CREATE TEMPORARY TABLE deletedate AS SELECT '$impdate'::character(20) AS endet\""
 	local pgf="$(dirname "$dst1")/progress/$(basename "$dst1")"
 
 	echo "RUNNING: ogr2ogr -f $DRIVER $opt $sf_opt -update -append -progress \"$DST\" $CRS \"$dst1\"" | sed -Ee 's/password=\S+/password=*removed*/'
@@ -419,11 +411,13 @@ export DRIVER
 export DST
 export JOBS=-1
 export opt
+export impdate
 
 opt=
 log=
 preprocessed=0
 sfre=
+impdate=
 
 export job=
 export tmpdir=$(mktemp -d)
@@ -956,6 +950,12 @@ EOF
 
 		echo "RESTORING $(bdate)"
 		restore "$src"
+		continue
+		;;
+
+	"importdate "*)
+		impdate=${src#importdate }
+		echo "IMPORTDATE: $impdate"
 		continue
 		;;
 
