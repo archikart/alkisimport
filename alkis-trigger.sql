@@ -11,6 +11,7 @@ SET default_with_oids = false;
 SET search_path = :"alkis_schema", public;
 
 --- Tabelle "delete" für Lösch- und Fortführungsdatensätze
+DROP TABLE IF EXISTS "delete";
 CREATE TABLE "delete" (
        ogc_fid         serial NOT NULL,
        typename        varchar,
@@ -253,12 +254,12 @@ $$ LANGUAGE plpgsql SET search_path = :"alkis_schema", public;
 CREATE FUNCTION pg_temp.create_trigger(hist BOOLEAN) RETURNS void AS $$
 BEGIN
 	IF hist THEN
-		CREATE TRIGGER delete_feature_trigger
+		CREATE OR REPLACE TRIGGER delete_feature_trigger
 			BEFORE INSERT ON delete
 			FOR EACH ROW
 			EXECUTE PROCEDURE delete_feature_hist();
 	ELSE
-		CREATE TRIGGER delete_feature_trigger
+		CREATE OR REPLACE TRIGGER delete_feature_trigger
 			BEFORE INSERT ON delete
 			FOR EACH ROW
 			EXECUTE PROCEDURE delete_feature_kill();
@@ -268,6 +269,7 @@ $$ LANGUAGE plpgsql;
 
 SELECT pg_temp.create_trigger(:alkis_hist);
 
+DROP TABLE IF EXISTS alkis_beziehungen;
 CREATE TABLE alkis_beziehungen (
        ogc_fid                 serial NOT NULL,
        beziehung_von           character(16) NOT NULL,
@@ -293,7 +295,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SET search_path = :"alkis_schema", public;
 
-CREATE TRIGGER insert_beziehung_trigger
+CREATE OR REPLACE TRIGGER insert_beziehung_trigger
 	AFTER INSERT ON alkis_beziehungen
 	FOR EACH ROW
 	EXECUTE PROCEDURE alkis_beziehung_inserted();
