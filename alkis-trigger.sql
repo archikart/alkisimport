@@ -70,7 +70,10 @@ BEGIN
 	END IF;
 
 	IF NEW.context='delete' THEN
-		SELECT endet INTO NEW.endet FROM pg_temp.deletedate;
+		SELECT value
+		INTO NEW.endet
+		FROM alkis_options
+		WHERE lower(name) = 'importdate';
 
 	ELSIF NEW.context='update' THEN
 		IF NEW.endet IS NULL THEN

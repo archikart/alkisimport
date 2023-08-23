@@ -222,11 +222,9 @@ import() {
 		;;
 	esac
 
-	opt="$opt -doo \"PRELUDE_STATEMENTS=CREATE TEMPORARY TABLE deletedate AS SELECT '$impdate'::character(20) AS endet\""
 	local pgf="$(dirname "$dst1")/progress/$(basename "$dst1")"
-
 	echo "RUNNING: ogr2ogr -f $DRIVER $opt $sf_opt -update -append -progress \"$DST\" $CRS \"$dst1\"" | sed -Ee 's/password=\S+/password=*removed*/'
-	eval ogr2ogr -f $DRIVER $opt $sf_opt -update -append -progress \"$DST\" $CRS \"$dst1\" \> \"$pgf\"
+	ogr2ogr -f $DRIVER $opt $sf_opt -update -append -progress "$DST" $CRS "$dst1" > "$pgf"
 	local r=$?
 	t1=$(bdate +%s)
 
@@ -411,13 +409,11 @@ export DRIVER
 export DST
 export JOBS=-1
 export opt
-export impdate
 
 opt=
 log=
 preprocessed=0
 sfre=
-impdate=
 
 export job=
 export tmpdir=$(mktemp -d)
@@ -950,12 +946,6 @@ EOF
 
 		echo "RESTORING $(bdate)"
 		restore "$src"
-		continue
-		;;
-
-	"importdate "*)
-		impdate=${src#importdate }
-		echo "IMPORTDATE: $impdate"
 		continue
 		;;
 
