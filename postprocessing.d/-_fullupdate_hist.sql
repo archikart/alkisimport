@@ -59,10 +59,15 @@ BEGIN
 
       FOR tabledata IN
         EXECUTE format('SELECT gml_id, beginnt
-                        FROM %I.%I
-                        WHERE beginnt <= %L
-                        AND endet IS NULL',
-                       table_schema,table_name,impdate)
+                        FROM %I.%I a
+                        LEFT JOIN %I.%I b
+                        ON b.featureid = a.gml_id
+                        WHERE a.beginnt <= %L
+                        AND a.endet IS NULL
+                        AND b.id IS NULL',
+                       table_schema,table_name,
+                       table_schema,'alkis_komplettupdate',
+                       impdate)
       LOOP
         featureid := tabledata.gml_id || translate(tabledata.beginnt,':-','');
 
