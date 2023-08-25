@@ -41,7 +41,7 @@ BEGIN
       EXECUTE format('INSERT INTO %I.%I (typename, featureid)
                       VALUES (%L, %L)',
                       TG_TABLE_SCHEMA,'alkis_komplettupdate',
-                      TG_TABLE_NAME,NEW.gml_id);      
+                      TG_TABLE_NAME,NEW.gml_id);
     END IF;
     
     RETURN NULL;
@@ -61,6 +61,13 @@ BEGIN
                         TG_TABLE_SCHEMA,'delete',
                         TG_TABLE_NAME,NEW.gml_id,'update','false',fid,NEW.beginnt);
       END IF;                
+    END IF;
+    
+    IF i = 0 THEN
+      EXECUTE format('INSERT INTO %I.%I (typename, featureid)
+                      VALUES (%L, %L)',
+                     TG_TABLE_SCHEMA,'alkis_insert',
+                     TG_TABLE_NAME,NEW.gml_id);
     END IF;
     
     RETURN NEW;
