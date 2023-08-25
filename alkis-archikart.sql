@@ -22,3 +22,15 @@ CREATE INDEX idx_alkis_komplettupdate_typename
 ON alkis_komplettupdate (typename);
 CREATE INDEX idx_alkis_komplettupdate_featureid 
 ON alkis_komplettupdate (featureid);
+
+DROP TABLE IF EXISTS alkis_insert;
+CREATE TABLE alkis_insert (
+	id serial NOT NULL,
+	typename varchar NOT NULL,
+	featureid character(16) NOT NULL,
+	PRIMARY KEY (id)
+);
+CREATE INDEX idx_alkis_insert_typename 
+ON alkis_insert (typename);
+CREATE INDEX idx_alkis_insert_featureid 
+ON alkis_komplettupdate (featureid);
