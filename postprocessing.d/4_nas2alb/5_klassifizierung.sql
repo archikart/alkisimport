@@ -20,7 +20,7 @@ INSERT INTO alkis_klassifizierungen(name, kennung, prefix, funktionsfeld, bodenz
 	('ax_bewertung',			'72004', 'B', 'klassifizierung',	'NULL::varchar',			'NULL::varchar',		'ax_klassifizierung_bewertung'),
 	('ax_klassifizierungnachwasserrecht',	'71003', 'W', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_klassifizierungnachwasserrecht'),
 	('ax_klassifizierungnachstrassenrecht',	'71001', 'S', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_klassifizierungnachstrassenrecht'),
-	('ax_musterlandesmusterundvergleichsstueck', '72002', 'M', 'kulturart',		'bodenzahlodergruenlandgrundzahl',	'ackerzahlodergruenlandzahl',	'ax_kulturart_musterlandesmusterundvergleichsstueck'),
+	('ax_musterundvergleichsstueck', '72002', 'M', 'nutzungsart',		'bodenzahlodergruenlandgrundzahl',	'ackerzahlodergruenlandzahl',	'ax_nutzungsart_musterundvergleichsstueck'),
 	('ax_anderefestlegungnachwasserrecht', '71004', 'W1', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_anderefestlegungnachwasserrecht'),
 	('ax_anderefestlegungnachstrassenrecht', '71002', 'S1', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_anderefestlegungnachstrassenrecht'),
 	('ax_naturumweltoderbodenschutzrecht', '71006', 'BS', 'artderfestlegung',	'NULL::varchar',			'NULL::varchar',		'ax_artderfestlegung_naturumweltoderbodenschutzrecht'),
