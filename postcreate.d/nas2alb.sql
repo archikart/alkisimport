@@ -288,14 +288,16 @@ CREATE TABLE klas_3x (
 	unf_anm character(20),
 	ff_entst integer,
 	ff_stand integer,
-	nutz_gml_id character(16),
+	klas_gml_id character(16),
+	fs_gml_id character(16),
 	primary key (pk)
 );
 COMMENT ON TABLE klas_3x IS 'BASE: Klassifizierungen';
 
 CREATE INDEX klas_3x_idx1 ON klas_3x(flsnr);
 CREATE INDEX klas_3x_idx2 ON klas_3x(klf);
-CREATE INDEX klas_3x_idx3 ON klas_3x(nutz_gml_id);
+CREATE INDEX klas_3x_idx3 ON klas_3x(klas_gml_id);
+CREATE INDEX klas_3x_idx4 ON klas_3x(fs_gml_id);
 
 
 SELECT alkis_dropobject('kls_shl');
@@ -343,6 +345,7 @@ CREATE TABLE nutz_21 (
 	ff_entst INTEGER,
 	ff_stand INTEGER,
 	nutz_gml_id character(16),
+	fs_gml_id character(16)
 	primary key (pk)
 );
 COMMENT ON TABLE nutz_21 IS 'BASE: Nutzungen';
@@ -350,6 +353,7 @@ COMMENT ON TABLE nutz_21 IS 'BASE: Nutzungen';
 CREATE INDEX nutz_21_idx1 ON nutz_21(flsnr);
 CREATE INDEX nutz_21_idx2 ON nutz_21(nutzsl);
 CREATE INDEX nutz_21_idx3 ON nutz_21(nutz_gml_id);
+CREATE INDEX nutz_21_idx4 ON nutz_21(fs_gml_id);
 
 SELECT alkis_dropobject('nutz_shl');
 CREATE TABLE nutz_shl (
