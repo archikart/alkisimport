@@ -345,7 +345,7 @@ CREATE TABLE nutz_21 (
 	ff_entst INTEGER,
 	ff_stand INTEGER,
 	nutz_gml_id character(16),
-	fs_gml_id character(16)
+	fs_gml_id character(16),
 	primary key (pk)
 );
 COMMENT ON TABLE nutz_21 IS 'BASE: Nutzungen';
