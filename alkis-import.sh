@@ -117,8 +117,10 @@ rund() {
 	if [ -d "$dir.d" ]; then
 		for i in $(ls -1d ${dir}.d/* 2>/dev/null | sort); do
 			if [ -d "$i" ]; then
-				#ls -1 $i/*.sql 2>/dev/null | sort | parallel --line-buffer --halt soon,fail=1 --jobs=$JOBS sql
-				ls -1 $i/*.sql 2>/dev/null | sort | parallel --line-buffer --halt soon,fail=1 --jobs=-1 sql
+				if [ ! -f "$i/ignore_folder" ]; then
+					#ls -1 $i/*.sql 2>/dev/null | sort | parallel --line-buffer --halt soon,fail=1 --jobs=$JOBS sql
+					ls -1 $i/*.sql 2>/dev/null | sort | parallel --line-buffer --halt soon,fail=1 --jobs=-1 sql
+				fi
 			elif [ -f "$i" -a -r "$i" ]; then
 				sql $i
 			else
