@@ -160,9 +160,6 @@ UPDATE ax_bodenschaetzung SET bodenzahlodergruenlandgrundzahl=NULL WHERE bodenza
 
 DELETE FROM klas_3x;
 INSERT INTO klas_3x(flsnr,pk,klf,wertz1,wertz2,gemfl,fl,ff_entst,ff_stand,klas_gml_id,fs_gml_id)
-  SELECT
-    *
-  FROM (
     SELECT
       alkis_flsnr(f) AS flsnr,
       to_hex(nextval('klas_3x_pk_seq'::regclass)) AS pk,
@@ -180,6 +177,4 @@ INSERT INTO klas_3x(flsnr,pk,klf,wertz1,wertz2,gemfl,fl,ff_entst,ff_stand,klas_g
       ON f.wkb_geometry && k.wkb_geometry
       AND alkis_relate(f.wkb_geometry,k.wkb_geometry,'2********','ax_flurstueck:'||f.gml_id||'<=>'||k.name||':'||k.gml_id)
     WHERE f.endet IS NULL
-    GROUP BY alkis_flsnr(f), f.amtlicheflaeche, f.wkb_geometry, k.klassifizierung, k.bodenzahl, k.ackerzahl, k.gml_id, f.gml_id
-  ) AS klas_3x
-  WHERE fl>0;
+    GROUP BY alkis_flsnr(f), f.amtlicheflaeche, f.wkb_geometry, k.klassifizierung, k.bodenzahl, k.ackerzahl, k.gml_id, f.gml_id;

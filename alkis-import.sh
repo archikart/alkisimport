@@ -120,9 +120,15 @@ rund() {
 				if [ ! -f "$i/ignore_folder" ]; then
 					#ls -1 $i/*.sql 2>/dev/null | sort | parallel --line-buffer --halt soon,fail=1 --jobs=$JOBS sql
 					ls -1 $i/*.sql 2>/dev/null | sort | parallel --line-buffer --halt soon,fail=1 --jobs=-1 sql
+				else
+					echo "$P: Ordner <${i##/}> wird nicht verarbeitet."
 				fi
 			elif [ -f "$i" -a -r "$i" ]; then
-				sql $i
+				if [ ! -f "${i%*.*}.ignore" ]; then
+					sql $i
+				else
+					echo "$P: Datei <${i##*/}> wird nicht verarbeitet."
+				fi
 			else
 				continue
 			fi

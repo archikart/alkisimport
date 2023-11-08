@@ -139,9 +139,6 @@ CREATE SEQUENCE nutz_shl_pk_seq;
 
 DELETE FROM nutz_21;
 INSERT INTO nutz_21(flsnr,pk,nutzsl,gemfl,fl,ff_entst,ff_stand,nutz_gml_id,fs_gml_id)
-  SELECT
-    *
-  FROM (
     SELECT
       alkis_flsnr(f) AS flsnr,
       to_hex(nextval('nutz_shl_pk_seq'::regclass)) AS pk,
@@ -157,6 +154,4 @@ INSERT INTO nutz_21(flsnr,pk,nutzsl,gemfl,fl,ff_entst,ff_stand,nutz_gml_id,fs_gm
         ON f.wkb_geometry && n.wkb_geometry
         AND alkis_relate(f.wkb_geometry,n.wkb_geometry,'2********','ax_flurstueck:'||f.gml_id||'<=>'||n.name||':'||n.gml_id)
     WHERE f.endet IS NULL
-    GROUP BY alkis_flsnr(f), f.wkb_geometry, n.nutzung, n.gml_id, f.gml_id
-  ) AS nutz_21
-  WHERE fl>0;
+    GROUP BY alkis_flsnr(f), f.wkb_geometry, n.nutzung, n.gml_id, f.gml_id;
