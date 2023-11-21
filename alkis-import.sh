@@ -123,7 +123,7 @@ rund() {
 				else
 					echo "$P: Ordner <${i##/}> wird nicht verarbeitet."
 				fi
-			elif [ -f "$i" -a -r "$i" ]; then
+			elif [[ -f "$i" && -r "$i" && "$i" =~ \.sql$ ]]; then
 				if [ ! -f "${i%*.*}.ignore" ]; then
 					sql $i
 				else
@@ -399,17 +399,13 @@ major=${GDAL_VERSION#GDAL }
 major=${major%%.*}
 minor=${GDAL_VERSION#GDAL $major.}
 minor=${minor%%.*}
-if [ $major -lt 2 ] || [ $major -eq 2 -a $minor -lt 3 ]; then
-	echo "$P: erfordert GDAL >=2.3" >&2
+if [ $major -lt 3 ] || [ $major -eq 3 -a $minor -lt 8 ]; then
+	echo "$P: erfordert GDAL >=3.8" >&2
 	exit 1
 fi
 
-# Verhindern, dass andere GML-Treiber übernehmen
-if [ $major -lt 3 ] || [ $major -eq 3 -a $minor -lt 3 ]; then
-	export OGR_SKIP=GML,SEGY
-else
-	export OGR_SKIP=GML
-fi
+# Verhindern, dass der GML-Treiber übernimmt
+export OGR_SKIP=GML
 
 export CPL_DEBUG
 export B
@@ -478,9 +474,9 @@ do
 					;;
 
 				*)
-					echo "$P: Nicht unterstützte Datei $file" >&2
 					continue
 					;;
+
 				esac
 
 				(( S += s )) || true
@@ -554,14 +550,14 @@ EOF
 		}
 		export -f runsql
 		dump() {
-			pg_dump -Fc -f "$1.backup" "$DB"
+			pg_dump -Fc -f "$1.backup" -n "$SCHEMA" "$DB"
 		}
 		restore() {
 			if ! [ -f "$1.backup" -a -r "$1.backup" ]; then
 				echo "$P: $1.backup nicht gefunden oder nicht lesbar." >&2
 				return 1
 			fi
-			pg_restore -Fc -c -d "$DB" "$1.backup"
+			pg_restore -Fc --if-exists -c -d "$DB" "$1.backup"
 		}
 		export DB
 		log() {
