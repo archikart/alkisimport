@@ -80,6 +80,7 @@ SELECT format(E'DROP TRIGGER IF EXISTS %I ON %I.%I;\nCREATE TRIGGER %I BEFORE IN
         a.table_name || '_insert', a.table_schema, a.table_name)
     FROM information_schema.columns a
     JOIN information_schema.columns b ON a.table_schema=b.table_schema AND a.table_name=b.table_name AND b.column_name='beginnt'
+    JOIN information_schema.tables c ON c.table_schema=a.table_schema AND c.table_name=a.table_name AND c.table_type='BASE TABLE'
     WHERE a.table_schema=:'alkis_schema'
       AND substr(a.table_name,1,3) IN ('ax_','ap_','ks_','aa_','au_','ta_')
       AND a.column_name='gml_id';
