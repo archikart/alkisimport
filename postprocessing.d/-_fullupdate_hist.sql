@@ -35,11 +35,15 @@ BEGIN
     sql := 'SELECT a.table_schema, a.table_name
             FROM information_schema.columns a
             JOIN information_schema.columns b
-            ON a.table_schema=b.table_schema
+            ON a.table_schema = b.table_schema
             AND a.table_name = b.table_name
-            AND b.column_name = ''beginnt''
-            WHERE a.table_schema = ''public''
-            AND substr(a.table_name, 1, 3) IN (''ax_'', ''ap_'', ''ks_'', ''aa_'', ''au_'', ''ta_'')
+            AND b.column_name = 'beginnt'
+            JOIN information_schema.tables c
+            ON c.table_schema = a.table_schema 
+            AND c.table_name = a.table_name
+            AND c.table_type = 'BASE TABLE'
+            WHERE a.table_schema = 'public'
+            AND substr(a.table_name, 1, 3) IN ('ax_','ap_','ln_','lb_','au_','aa_')
             AND a.column_name = ''gml_id''
             ORDER BY a.table_name';
     
