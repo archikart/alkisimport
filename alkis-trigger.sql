@@ -272,34 +272,3 @@ END;
 $$ LANGUAGE plpgsql;
 
 SELECT pg_temp.create_trigger(:alkis_hist);
-
-DROP TABLE IF EXISTS alkis_beziehungen;
-CREATE TABLE alkis_beziehungen (
-       ogc_fid                 serial NOT NULL,
-       beziehung_von           character(16) NOT NULL,
-       beziehungsart           varchar,
-       beziehung_zu            character(16) NOT NULL,
-       PRIMARY KEY (ogc_fid)
-);
-
-CREATE INDEX alkis_beziehungen_von_idx ON alkis_beziehungen USING btree (beziehung_von);
-CREATE INDEX alkis_beziehungen_zu_idx  ON alkis_beziehungen USING btree (beziehung_zu);
-CREATE INDEX alkis_beziehungen_art_idx ON alkis_beziehungen USING btree (beziehungsart);
-
-COMMENT ON TABLE alkis_beziehungen IS 'BASE: Objektbeziehungen';
-COMMENT ON COLUMN alkis_beziehungen.beziehung_von IS 'Join auf Feld gml_id verschiedener Tabellen';
-COMMENT ON COLUMN alkis_beziehungen.beziehung_zu  IS 'Join auf Feld gml_id verschiedener Tabellen';
-COMMENT ON COLUMN alkis_beziehungen.beziehungsart IS 'Typ der Beziehung zwischen der von- und zu-Tabelle';
-
--- Beziehungssätze aufräumen
-CREATE OR REPLACE FUNCTION alkis_beziehung_inserted() RETURNS TRIGGER AS $$
-BEGIN
-        DELETE FROM alkis_beziehungen WHERE ogc_fid<NEW.ogc_fid AND beziehung_von=NEW.beziehung_von AND beziehungsart=NEW.beziehungsart AND beziehung_zu=NEW.beziehung_zu;
-        RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SET search_path = :"alkis_schema", public;
-
-CREATE OR REPLACE TRIGGER insert_beziehung_trigger
-	AFTER INSERT ON alkis_beziehungen
-	FOR EACH ROW
-	EXECUTE PROCEDURE alkis_beziehung_inserted();
