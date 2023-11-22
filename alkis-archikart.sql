@@ -33,4 +33,4 @@ CREATE TABLE alkis_insert (
 CREATE INDEX idx_alkis_insert_typename 
 ON alkis_insert (typename);
 CREATE INDEX idx_alkis_insert_featureid 
-ON alkis_komplettupdate (featureid);
+ON alkis_insert (featureid);
