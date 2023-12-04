@@ -46,14 +46,14 @@ BEGIN
     
     RETURN NULL;
   ELSE
+    EXECUTE format('SELECT COUNT(*)
+                    FROM %I.%I
+                    WHERE GML_ID=%L',
+                    TG_TABLE_SCHEMA,TG_TABLE_NAME,
+                    NEW.GML_ID)
+                    INTO I;
+    
     IF ku THEN
-      EXECUTE format('SELECT COUNT(*)
-                      FROM %I.%I
-                      WHERE GML_ID=%L',
-                      TG_TABLE_SCHEMA,TG_TABLE_NAME,
-                      NEW.GML_ID)
-                      INTO I;
-      
       IF i > 0 THEN
         fid = NEW.gml_id || translate(NEW.beginnt,'-:','');
         EXECUTE format('INSERT INTO %I.%I (typename, featureid, context, safetoignore, replacedby, endet)
