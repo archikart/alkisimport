@@ -1,4 +1,4 @@
-SET search_path = :"alkis_schema", :"parent_schema", :"postgis_schema", public;
+﻿SET search_path = :"alkis_schema", :"parent_schema", :"postgis_schema", public;
 
 ---
 --- Klassifizierungen
@@ -29,7 +29,7 @@ VALUES
 ('ax_bodenschaetzung', '72001', 'b', 'kulturart', 'bodenzahlodergruenlandgrundzahl', 'ackerzahlodergruenlandzahl', 'ax_kulturart_bodenschaetzung',
  'bodenart', 'translate(entstehungsartoderklimastufewasserverhaeltnisse::text,''{}'','''')', 'translate(sonstigeAngaben::text,''{}'','''')', 'zustandsstufeoderbodenstufe',
  'NULL::varchar', 'NULL::varchar'),
-('ax_musterlandesmusterundvergleichsstueck', '72002', 'm', 'kulturart', 'bodenzahlodergruenlandgrundzahl', 'ackerzahlodergruenlandzahl', 'ax_kulturart_musterlandesmusterundvergleichsstueck',
+('ax_musterundvergleichsstueck', '72002', 'm', 'kulturart', 'bodenzahlodergruenlandgrundzahl', 'ackerzahlodergruenlandzahl', 'ax_kulturart_musterlandesmusterundvergleichsstueck',
  'bodenart', 'translate(entstehungsartoderklimastufewasserverhaeltnisse::text,''{}'','''')', 'translate(sonstigeAngaben::text,''{}'','''')', 'zustandsstufeoderbodenstufe',
  'NULL::varchar', 'NULL::varchar'),
 ('ax_bewertung', '72004', 'B', 'klassifizierung', 'NULL::varchar', 'NULL::varchar', 'ax_klassifizierung_bewertung',
