@@ -1,4 +1,4 @@
-SET search_path = :"alkis_schema", :"parent_schema", :"postgis_schema", public;
+---SET search_path = :"alkis_schema", :"parent_schema", :"postgis_schema", public;
 
 ---
 --- Nutzungen
@@ -43,7 +43,7 @@ INSERT INTO alkis_nutzungen(name, kennung, funktionsfeld, relationstext, element
 	('ax_tagebaugrubesteinbruch', '41005', 'abbaugut', ' von ', 'Tagebau, Grube, Steinbruch', 'ax_abbaugut_tagebaugrubesteinbruch', 'Name', 'name', NULL, NULL),
 	('ax_unlandvegetationsloseflaeche', '43007', 'funktion', ', ', 'Unland, vegetationslose Fläche', 'ax_funktion_unlandvegetationsloseflaeche', 'Name', 'name', 'Oberflächenmaterial', 'oberflaechenmaterial'),
 	('ax_wald', '43002', 'vegetationsmerkmal', ', ', 'Wald', 'ax_vegetationsmerkmal_wald', 'Name', 'name', NULL, NULL),
-	('ax_weg', '43006', 'funktion', ', ', 'Weg', 'ax_funktion_weg', 'Name', 'coalesce(unverschluesselt,land || regierungsbezirk || kreis || gemeinde || lage)', NULL, NULL),
+	('ax_weg', '42006', 'funktion', ', ', 'Weg', 'ax_funktion_weg', 'Name', 'coalesce(unverschluesselt,land || regierungsbezirk || kreis || gemeinde || lage)', NULL, NULL),
 	('ax_wohnbauflaeche', '41001', 'artderbebauung', ' mit Art der Bebauung ', 'Wohnbaufläche', 'ax_artderbebauung_wohnbauflaeche', 'Name', 'name', NULL, NULL);
 
 SELECT alkis_dropobject('alkis_createnutzung');
