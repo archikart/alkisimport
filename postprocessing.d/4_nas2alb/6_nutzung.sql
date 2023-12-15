@@ -94,7 +94,7 @@ BEGIN
 		   || 'beginnt, '
 		   || 'wkb_geometry'
 		   || ' FROM ' || r.name
-		   || ' WHERE endet IS NULL AND hatdirektunten IS NULL'
+		   || ' WHERE endet IS NULL AND hatdirektunten IS NULL AND istweiterenutzung IS NULL'
 		   ;
 
 		kv := kv
