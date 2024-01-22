@@ -1,4 +1,4 @@
----SET search_path = :"alkis_schema", :"parent_schema", :"postgis_schema", public;
+﻿SET search_path = :"alkis_schema", :"parent_schema", :"postgis_schema", public;
 
 ---
 --- Nutzungen
