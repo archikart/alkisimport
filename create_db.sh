@@ -26,7 +26,7 @@ else
 	else
 		msg=$(psql "host=$host dbname=$dbname user=$user password=$password" -t -c \
                            "SELECT COUNT(*) 
-                            FROM ax_flurstueck")
+                            FROM archikart.ax_flurstueck")
 		if [ $msg = 0 ] ; then
 			rt=1
 		else
