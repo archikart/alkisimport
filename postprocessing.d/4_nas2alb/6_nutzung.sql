@@ -137,12 +137,13 @@ SELECT alkis_dropobject('nutz_shl_pk_seq');
 CREATE SEQUENCE nutz_shl_pk_seq;
 
 DELETE FROM nutz_21;
-INSERT INTO nutz_21(flsnr,pk,nutzsl,gemfl,fl,ff_entst,ff_stand,nutz_gml_id,fs_gml_id)
+INSERT INTO nutz_21(flsnr,pk,nutzsl,gemfl,umfang,fl,ff_entst,ff_stand,nutz_gml_id,fs_gml_id)
   SELECT
     alkis_flsnr(f) AS flsnr,
     to_hex(nextval('nutz_shl_pk_seq'::regclass)) AS pk,
     n.nutzung AS nutzsl,
      sum(st_area(alkis_intersection(f.wkb_geometry,n.wkb_geometry,'ax_flurstueck:'||f.gml_id||'<=>'||n.name||':'||n.gml_id))) AS gemfl,
+     sum(st_perimeter2d(alkis_intersection(f.wkb_geometry,n.wkb_geometry,'ax_flurstueck:'||f.gml_id||'<=>'||n.name||':'||n.gml_id))) AS umfang,
     (sum(st_area(alkis_intersection(f.wkb_geometry,n.wkb_geometry,'ax_flurstueck:'||f.gml_id||'<=>'||n.name||':'||n.gml_id))*amtlicheflaeche/NULLIF(st_area(f.wkb_geometry),0)))::int AS fl,
     0 AS ff_entst,
     0 AS ff_stand,
