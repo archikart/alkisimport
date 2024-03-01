@@ -159,7 +159,7 @@ CREATE SEQUENCE klas_3x_pk_seq;
 UPDATE ax_bodenschaetzung SET bodenzahlodergruenlandgrundzahl=NULL WHERE bodenzahlodergruenlandgrundzahl IN ('nicht belegt','');
 
 DELETE FROM klas_3x;
-INSERT INTO klas_3x(flsnr,pk,klf,wertz1,wertz2,gemfl,umfang,fl,ff_entst,ff_stand,klas_gml_id,fs_gml_id)
+INSERT INTO klas_3x(flsnr,pk,klf,wertz1,wertz2,gemfl,umfang,fl,ff_entst,ff_stand,typ_name,klas_gml_id,fs_gml_id)
   SELECT
     alkis_flsnr(f) AS flsnr,
     to_hex(nextval('klas_3x_pk_seq'::regclass)) AS pk,
@@ -171,6 +171,7 @@ INSERT INTO klas_3x(flsnr,pk,klf,wertz1,wertz2,gemfl,umfang,fl,ff_entst,ff_stand
     (sum(st_area(alkis_intersection(f.wkb_geometry,k.wkb_geometry,'ax_flurstueck:'||f.gml_id||'<=>'||k.name||':'||k.gml_id)))*amtlicheflaeche/NULLIF(st_area(f.wkb_geometry),0))::int AS fl,
     0 AS ff_entst,
     0 AS ff_stand,
+    k.name AS typ_name,
     k.gml_id AS klas_gml_id,
     f.gml_id AS fs_gml_id
   FROM ax_flurstueck f
@@ -178,4 +179,4 @@ INSERT INTO klas_3x(flsnr,pk,klf,wertz1,wertz2,gemfl,umfang,fl,ff_entst,ff_stand
       ON f.wkb_geometry && k.wkb_geometry
       AND alkis_relate(f.wkb_geometry,k.wkb_geometry,'2********','ax_flurstueck:'||f.gml_id||'<=>'||k.name||':'||k.gml_id)
   WHERE f.endet IS NULL
-  GROUP BY alkis_flsnr(f), f.amtlicheflaeche, f.wkb_geometry, k.klassifizierung, k.bodenzahl, k.ackerzahl, k.gml_id, f.gml_id;
+  GROUP BY alkis_flsnr(f), f.amtlicheflaeche, f.wkb_geometry, k.klassifizierung, k.bodenzahl, k.ackerzahl, k.gml_id, f.gml_id, k.name;

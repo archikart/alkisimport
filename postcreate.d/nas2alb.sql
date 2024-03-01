@@ -281,6 +281,7 @@ CREATE TABLE klas_3x (
 	klf character(32),
 	fl character(16),
 	gemfl double precision,
+	umfang double precision,
 	klz character(10),
 	wertz1 character(10),
 	wertz2 character(10),
@@ -288,6 +289,7 @@ CREATE TABLE klas_3x (
 	unf_anm character(20),
 	ff_entst integer,
 	ff_stand integer,
+	typ_name varchar,
 	klas_gml_id character(16),
 	fs_gml_id character(16),
 	primary key (pk)
@@ -342,8 +344,10 @@ CREATE TABLE nutz_21 (
 	nutzsl character(32),
 	fl character(16),
 	gemfl double precision,
+	umfang double precision,
 	ff_entst INTEGER,
 	ff_stand INTEGER,
+	typ_name varchar,
 	nutz_gml_id character(16),
 	fs_gml_id character(16),
 	primary key (pk)
