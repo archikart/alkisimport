@@ -26,10 +26,10 @@ name, kennung, prefix, funktionsfeld, bodenzahl, ackerzahl, enumeration,
 bodenklasse, entstehungsart, sonstigeangaben, zustandsstufe, 
 infofeld1, infofeld2) 
 VALUES
-('ax_bodenschaetzung', '72001', 'b', 'nutzungsart', 'bodenzahlodergruenlandgrundzahl', 'ackerzahlodergruenlandzahl', 'ax_nutzungsart_bodenschaetzung',
+('ax_bodenschaetzung', '72001', 'b', 'bodenart', 'bodenzahlodergruenlandgrundzahl', 'ackerzahlodergruenlandzahl', 'ax_nutzungsart_bodenschaetzung',
  'bodenart', 'translate(entstehungsart::text,''{}'','''')', 'translate(sonstigeangaben::text,''{}'','''')', 'zustandsstufe',
  'NULL::varchar', 'NULL::varchar'),
-('ax_musterundvergleichsstueck', '72002', 'm', 'nutzungsart', 'bodenzahlodergruenlandgrundzahl', 'ackerzahlodergruenlandzahl', 'ax_nutzungsart_musterundvergleichsstueck',
+('ax_musterundvergleichsstueck', '72002', 'm', 'bodenart', 'bodenzahlodergruenlandgrundzahl', 'ackerzahlodergruenlandzahl', 'ax_nutzungsart_musterundvergleichsstueck',
  'bodenart', 'translate(entstehungsart::text,''{}'','''')', 'translate(sonstigeangaben::text,''{}'','''')', 'zustandsstufe',
  'NULL::varchar', 'NULL::varchar'),
 ('ax_bewertung', '72004', 'B', 'klassifizierung', 'NULL::varchar', 'NULL::varchar', 'ax_klassifizierung_bewertung',
