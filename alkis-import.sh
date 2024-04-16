@@ -18,6 +18,7 @@
 set -e
 set -u
 set -o pipefail
+set -o noclobber
 
 # Felder als String interpretieren (führende Nullen nicht abschneiden)
 export GML_FIELDTYPES=ALWAYS_STRING
@@ -107,19 +108,33 @@ timeunits() {
 export -f timeunits
 
 log() {
-	tee $1 | python3 $B/refilter.py
+	python3 $B/refilter.py | tee $1
 }
 export -f log
+
+lock() {
+	for i in $(seq 10); do
+		echo $$ 2>|/dev/null >$lock && return 0
+		sleep 0.1
+	done
+	echo "$(bdate): lock failed"
+	return 1
+}
+export -f lock
+
+unlock() {
+	rm -f $lock
+}
+export -f unlock
 
 rund() {
 	local dir=$1
 
 	if [ -d "$dir.d" ]; then
-		for i in $(ls -1d ${dir}.d/* 2>/dev/null | sort); do
+		for i in $(ls -1d ${dir}.d/* 2>|/dev/null | sort); do
 			if [ -d "$i" ]; then
 				if [ ! -f "$i/ignore_folder" ]; then
-					#ls -1 $i/*.sql 2>/dev/null | sort | parallel --line-buffer --halt soon,fail=1 --jobs=$JOBS sql
-					ls -1 $i/*.sql 2>/dev/null | sort | parallel --line-buffer --halt soon,fail=1 --jobs=-1 sql
+					ls -1 $i/*.sql 2>|/dev/null | sort | parallel --line-buffer --halt soon,fail=1 --jobs=-1 sql
 				else
 					echo "$P: Ordner <${i##/}> wird nicht verarbeitet."
 				fi
@@ -155,10 +170,6 @@ import() {
 		dst=${src%.???}.xml
 		dst="$tmpdir/${dst//\//_}"
 		echo "DECOMPRESS $(bdate): $src"
-		if [ -e "$dst" ]; then
-			echo "$P: $dst bereits vorhanden." >&2
-			return 1
-		fi
 		if ! zcat "$src" >"$dst"; then
 			rm -v "$dst"
 			echo "$P: $src konnte nicht extrahiert werden." >&2
@@ -176,10 +187,6 @@ import() {
 		dst=${src%.??}
 		dst="$tmpdir/${dst//\//_}"
 		echo "DECOMPRESS $(bdate): $src"
-		if [ -e "$dst" ]; then
-			echo "$P: $dst bereits vorhanden." >&2
-			return 1
-		fi
 		if ! zcat "$src" >"$dst"; then
 			rm -v "$dst"
 			echo "$P: $src konnte nicht extrahiert werden." >&2
@@ -217,6 +224,7 @@ import() {
 	echo "IMPORT $(bdate): $dst $(memunits $s)"
 
 	if [ -n "$sfre" ] && eval [[ "$src" =~ "$sfre" ]]; then
+		echo "WARNING: Importfehler werden ignoriert"
 		opt="$opt -skipfailures"
 	fi
 	opt="$opt -ds_transaction --config PG_USE_COPY $USECOPY -nlt CONVERT_TO_LINEAR"
@@ -254,11 +262,11 @@ process() {
 		fi
 
 		if (( preprocessed == 0 )); then
-			pushd "$B" >/dev/null
+			pushd "$B" >|/dev/null
 			preprocessed=1
 			rund preprocessing
 			r=$?
-			popd >/dev/null
+			popd >|/dev/null
 			if [ "$r" -ne 0 ]; then
 				return $r
 			fi
@@ -300,7 +308,7 @@ progress() {
 	local remaining_size
 	local errors=0
 
-	lockfile -l1 $lock
+	lock
 	[ -f $progress ] && . $progress
 
 	start_time=${start_time:-$t0}
@@ -333,7 +341,7 @@ progress() {
 
 		if (( t0 < t1 )); then
 			echo "TIME: $file mit $(memunits $size) in $(timeunits $t0 $t1) importiert ($(memunits $throughput)/s; Gesamt:$(memunits $total_throughput)/s)."
-			echo "REMAINING: $(memunits $remaining_size) $(( remaining_size * 100 / total_size ))% $(timeunits $remaining_time) ETA:$(date --date="1970-01-01 $eta seconds UTC")"
+			echo "REMAINING: $(memunits $remaining_size) $(( remaining_size * 100 / total_size ))% $(timeunits $remaining_time) ETA:$(date --date="@$eta")"
 		else
 			echo "TIME: $file mit $(memunits $size) in 0,nichts (Gesamt $(memunits $total_throughput)/s)."
 		fi
@@ -341,7 +349,7 @@ progress() {
 		echo "TIME: $file mit $(memunits $size) in 0,nichts importiert."
 	fi
 
-	cat <<EOF >$progress
+	cat <<EOF >|$progress
 start_time=$start_time
 total_size=$total_size
 remaining_size=$remaining_size
@@ -351,12 +359,12 @@ quittierungsnr=$quittierungsnr
 quittierungsi=$quittierungsi
 EOF
 
-	rm -f $lock
+	unlock
 }
 export -f progress
 
 final() {
-	lockfile -l1 $lock
+	lock
 	start_time=0
 	last_time=0
 	! [ -f $progress ] || . $progress
@@ -364,7 +372,8 @@ final() {
 	if (( total_elapsed > 0 )); then
 		echo "FINAL: $(memunits $total_size) in $(timeunits $start_time $last_time) ($(memunits $(( total_size / total_elapsed )))/s)"
 	fi
-	rm -rf $tmpdir
+	rm -f $progress
+	unlock
 }
 
 export LC_CTYPE=de_DE.UTF-8
@@ -482,7 +491,7 @@ do
 				(( S += s )) || true
 			done <"$F"
 
-			cat <<EOF >$progress
+			cat <<EOF >|$progress
 total_size=$S
 remaining_size=$S
 EOF
@@ -508,7 +517,7 @@ EOF
 		DRIVER=PostgreSQL
 		sql() {
 			local file=$1
-			pushd "$B" >/dev/null
+			pushd "$B" >|/dev/null
 			local t0=$(bdate +%s)
 			echo "SQL RUN: $file $(bdate)"
 			psql -X -P pager=off \
@@ -529,7 +538,7 @@ EOF
 			local r=$?
 			local t1=$(bdate +%s)
 			echo "SQL DONE[$r]: $file $(bdate) in $(timeunits $t0 $t1)"
-			popd >/dev/null
+			popd >|/dev/null
 			return $r
 		}
 		export -f sql
@@ -561,35 +570,38 @@ EOF
 		}
 		export DB
 		log() {
-			n=$(psql -X -t -c "SELECT count(*) FROM pg_catalog.pg_namespace WHERE nspname='${SCHEMA//\'/\'\'}'" "$DB")
+			export SCHEMAL="'${SCHEMA//\'/\'\'}'"
+			export SCHEMAI="\"${SCHEMA//\"/\"\"}\""
+			n=$(psql -X -t -c "SELECT count(*) FROM pg_catalog.pg_namespace WHERE nspname=$SCHEMAL" "$DB")
 			n=${n//[	 ]}
 			if [ $n -eq 0 ]; then
-				psql -X -q -c "CREATE SCHEMA \"${SCHEMA//\"/\"\"}\"" "$DB"
+				psql -X -q -c "CREATE SCHEMA $SCHEMAI" "$DB"
 			fi
 
-			n=$(psql -X -t -c "SELECT count(*) FROM pg_catalog.pg_namespace WHERE nspname='${SCHEMA//\'/\'\'}'" "$DB")
+			n=$(psql -X -t -c "SELECT count(*) FROM pg_catalog.pg_namespace WHERE nspname=$SCHEMAL" "$DB")
 			n=${n//[	 ]}
 			if [ $n -eq 0 ]; then
 				echo "Schema $SCHEMA nicht erzeugt" >&2
 				exit 1
 			fi
 
-			n=$(psql -X -t -c "SELECT count(*) FROM pg_catalog.pg_tables WHERE schemaname='${SCHEMA//\'/\'\'}' AND tablename='alkis_importlog'" "$DB")
+			n=$(psql -X -t -c "SELECT count(*) FROM pg_catalog.pg_tables WHERE schemaname=$SCHEMAL AND tablename='alkis_importlog'" "$DB")
 			n=${n//[	 ]}
 			if [ $n -eq 0 ]; then
-				psql -X -q -c "CREATE TABLE \"${SCHEMA//\"/\"\"}\".alkis_importlog(n SERIAL PRIMARY KEY, ts timestamp default now(), msg text)" "$DB"
+				psql -X -q -c "CREATE TABLE $SCHEMAI.alkis_importlog(n SERIAL PRIMARY KEY, ts timestamp default now(), msg text)" "$DB"
 			fi
 
-			rm -f $lock
+			unlock
 
-			tee $1 |
+			local log=$1
+			export log
 			(
 				IFS=
-				exec 5> >(python3 $B/refilter.py >&3)
+				exec 5> >(python3 $B/refilter.py | tee $log >&3)
 				while read m; do
 					echo "$m" >&5
 					m=${m//\'/\'\'}
-					echo "INSERT INTO \"${SCHEMA//\"/\"\"}\".alkis_importlog(msg) VALUES (E'${m//\'/\'\'}');"
+					echo "INSERT INTO $SCHEMAI.alkis_importlog(msg) VALUES (E'${m//\'/\'\'}');"
 				done
 				echo "\\q"
 			) |
@@ -772,11 +784,11 @@ EOF
 		fi
 
 		echo "INHERIT $(bdate)"
-		pushd "$B" >/dev/null
+		pushd "$B" >|/dev/null
 		rund preinherit
 		sql alkis-inherit.sql
 		rund postinherit
-		popd >/dev/null
+		popd >|/dev/null
 
 		continue
 		;;
@@ -797,12 +809,12 @@ EOF
 		fi
 
 		echo "CREATE $(bdate)"
-		pushd "$B" >/dev/null
+		pushd "$B" >|/dev/null
 		rund prepare
 		rund precreate
 		sql alkis-init.sql
 		rund postcreate
-		popd >/dev/null
+		popd >|/dev/null
 
 		continue
 		;;
@@ -814,12 +826,12 @@ EOF
 		fi
 
 		echo "CLEAN $(bdate)"
-		pushd "$B" >/dev/null
+		pushd "$B" >|/dev/null
 		rund prepare
 		rund preclean
 		sql alkis-clean.sql
 		rund postclean
-		popd >/dev/null
+		popd >|/dev/null
 
 		continue
 		;;
@@ -835,12 +847,12 @@ EOF
 		fi
 
 		echo "UPDATE $(bdate)"
-		pushd "$B" >/dev/null
+		pushd "$B" >|/dev/null
 		rund prepare
 		rund preupdate
 		sql alkis-update.sql
 		rund postupdate
-		popd >/dev/null
+		popd >|/dev/null
 
 		continue
 		;;
@@ -908,13 +920,21 @@ EOF
 		log=$(bdate +$src)
 
 		echo "LOGGING TO $log $(bdate)"
-		lockfile -l1 $lock
+		lock
 		exec 3>&1 4>&2 > >(log $log) 2>&1
-		lockfile -l1 $lock
-		rm -f $lock
+		lock
+		unlock
 
 		echo "LOG $(bdate)"
-		echo 'Import-Version: $Format:%h$'
+		if ! [ -e "$B/.git" ]; then
+			echo 'Import-Version: $Format:%h$'
+		else
+			if type -p git >/dev/null; then
+				git log -1 --pretty='Import-Version: %h'
+			else
+				echo 'Import-Version: unbekannt'
+			fi
+		fi
 		echo "GDAL-Version: $GDAL_VERSION"
 
 		continue
@@ -967,7 +987,7 @@ final
 if [ "$src" = "error" ]; then
 	echo "FEHLER BEIM IMPORT"
 elif [ "$src" != "exit" ]; then
-	pushd "$B" >/dev/null
+	pushd "$B" >|/dev/null
 
 	if (( preprocessed == 0 )); then
 		if rund preprocessing; then
@@ -985,7 +1005,7 @@ elif [ "$src" != "exit" ]; then
 		fi
 	fi
 
-	popd >/dev/null
+	popd >|/dev/null
 fi
 
 echo "END $(bdate)"

@@ -655,7 +655,7 @@ class alkisImportDlg(QDialog, alkisImportDlgBase):
             else:
                 conn = ""
 
-        conn += "dbname={} user='{}' password='{}'".format(self.leDBNAME.text(), self.leUID.text(), self.lePWD.text())
+        conn += "dbname='{}' user='{}' password='{}'".format(self.leDBNAME.text(), self.leUID.text(), self.lePWD.text())
 
         self.db = QSqlDatabase.addDatabase("QPSQL")
         self.db.setConnectOptions(conn)
@@ -810,7 +810,16 @@ class alkisImportDlg(QDialog, alkisImportDlgBase):
                 self.logqry = None
                 break
 
-            self.log("Import-Version: $Format:%h$")
+            if not os.path.exists(".git"):
+                self.log("Import-Version: $Format:%h$")
+            else:
+                git = which("git")
+                if not git:
+                    git = which("git.exe")
+                if git:
+                    self.runProcess([git, "log", "-1", "--pretty=Import-Version: %h"])
+                else:
+                    self.log("Import-Version: unbekannt")
 
             qry = self.db.exec_("SELECT version()")
 
@@ -829,12 +838,18 @@ class alkisImportDlg(QDialog, alkisImportDlgBase):
                 self.log("Mindestens PostgreSQL 8.4 erforderlich")
                 break
 
-            qry = self.db.exec_("SELECT postgis_version()")
+            qry = self.db.exec_("SELECT postgis_full_version()")
             if not qry or not qry.next():
-                self.log("Konnte PostGIS-Version nicht bestimmen!")
-                break
+                qry = self.db.exec_("SELECT postgis_version()")
+                if not qry or not qry.next():
+                    self.log("Konnte PostGIS-Version nicht bestimmen!")
+                    break
 
             self.log("PostGIS-Version: {}".format(qry.value(0)))
+
+            qry = self.db.exec_("SELECT inet_client_addr()")
+            if qry and qry.next():
+                self.log("Import von Client: {}".format(qry.value(0)))
 
             qry = self.db.exec_("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=current_schema() AND table_name='ax_flurstueck'")
             if not qry or not qry.next():
@@ -1164,6 +1179,7 @@ class alkisImportDlg(QDialog, alkisImportDlgBase):
                             args.extend(["-a_srs", "EPSG:{}".format(self.epsg)])
 
                         if self.cbxSkipFailures.isChecked() or fn in checked:
+                            self.log("WARNUNG: Importfehler werden ignoriert")
                             args.extend(["-skipfailures", "--config", "PG_USE_COPY", "NO"])
                         else:
                             args.extend(["--config", "PG_USE_COPY", "YES" if self.cbxUseCopy.isChecked() else "NO"])
