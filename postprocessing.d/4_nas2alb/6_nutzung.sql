@@ -38,7 +38,7 @@ INSERT INTO alkis_nutzungen(name, kennung, funktionsfeld, relationstext, element
 	('ax_schiffsverkehr', '42016', 'funktion', ', ', 'Schiffsverkehr', 'ax_funktion_schiffsverkehr', 'Name', 'coalesce(unverschluesselt,land || regierungsbezirk || kreis || gemeinde || lage)', NULL, NULL),
 	('ax_sportfreizeitunderholungsflaeche', '41008', 'funktion', ', ', 'Sport-, Freizeit- und Erholungsfläche', 'ax_funktion_sportfreizeitunderholungsflaeche', 'Name', 'name', NULL, NULL),
 	('ax_stehendesgewaesser', '44006', 'funktion', ', ', 'Stehendes Gewässer', 'ax_funktion_stehendesgewaesser', 'Name', 'coalesce(unverschluesselt,land || regierungsbezirk || kreis || gemeinde || lage)', NULL, NULL),
-	('ax_strassenverkehr', '53002', 'funktion', ', ', 'Straßenverkehr', 'ax_funktion_strasse', 'Name', 'coalesce(unverschluesselt,land || regierungsbezirk || kreis || gemeinde || lage)', NULL, NULL),
+	('ax_strassenverkehr', '42001', 'funktion', ', ', 'Straßenverkehr', 'ax_funktion_strasse', 'Name', 'coalesce(unverschluesselt,land || regierungsbezirk || kreis || gemeinde || lage)', NULL, NULL),
 	('ax_sumpf', '43006', 'NULL', '', 'Sumpf', NULL, NULL, NULL, NULL, NULL),
 	('ax_tagebaugrubesteinbruch', '41005', 'abbaugut', ' von ', 'Tagebau, Grube, Steinbruch', 'ax_abbaugut_tagebaugrubesteinbruch', 'Name', 'name', NULL, NULL),
 	('ax_unlandvegetationsloseflaeche', '43007', 'funktion', ', ', 'Unland, vegetationslose Fläche', 'ax_funktion_unlandvegetationsloseflaeche', 'Name', 'name', 'Oberflächenmaterial', 'oberflaechenmaterial'),
