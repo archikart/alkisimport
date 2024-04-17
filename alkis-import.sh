@@ -930,7 +930,7 @@ EOF
 			echo 'Import-Version: $Format:%h$'
 		else
 			if type -p git >/dev/null; then
-				git log -1 --pretty='Import-Version: %h'
+				git -C "$B" log -1 --pretty='Import-Version: %ad'
 			else
 				echo 'Import-Version: unbekannt'
 			fi
