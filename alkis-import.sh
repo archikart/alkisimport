@@ -287,7 +287,6 @@ process() {
 
 		export job
 		export progress
-		#parallel --tag --line-buffer --halt soon,fail=1 --jobs=$JOBS import <$job
 		parallel --line-buffer --halt soon,fail=1 --jobs=$JOBS import <$job
 		r=$?
 		rm $job
@@ -451,7 +450,7 @@ do
 			S=0
 			while read file
 			do
-				if [ "$file" = "exit" ]; then
+				if [ "$file" = "exit" ] || [ "$file" = "slot" ]; then
 					break
 				elif ! [ -f "$file" -a -r "$file" ]; then
 					continue
