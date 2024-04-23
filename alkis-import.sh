@@ -221,7 +221,7 @@ import() {
 
 	s=$(stat -c %s "$dst")
 
-	echo "IMPORT $(bdate): $dst $(memunits $s)"
+	echo "IMPORT (Slot: $jobi) $(bdate): $dst $(memunits $s)"
 
 	if [ -n "$sfre" ] && eval [[ "$src" =~ "$sfre" ]]; then
 		echo "WARNING: Importfehler werden ignoriert"
@@ -290,6 +290,7 @@ process() {
 		parallel --line-buffer --halt soon,fail=1 --jobs=$JOBS import <$job
 		r=$?
 		rm $job
+		job=
 	fi
 	return $r
 }
@@ -369,7 +370,7 @@ final() {
 	! [ -f $progress ] || . $progress
 	total_elapsed=$(( last_time - start_time ))
 	if (( total_elapsed > 0 )); then
-		echo "FINAL: $(memunits $total_size) in $(timeunits $start_time $last_time) ($(memunits $(( total_size / total_elapsed )))/s)"
+		echo "FINAL (Slot: $jobi): $(memunits $total_size) in $(timeunits $start_time $last_time) ($(memunits $(( total_size / total_elapsed )))/s)"
 	fi
 	rm -f $progress
 	unlock
@@ -428,15 +429,29 @@ preprocessed=0
 sfre=
 
 export job=
-export tmpdir=$(mktemp -d)
-[ -d "$tmpdir" ] && trap "rm -rf '$tmpdir'" EXIT
-export lock=$tmpdir/nas.lock
-export progress=$tmpdir/nas.progress
+export tmpdir=
+export lock=
+export progress=
 export jobi=0
 
-rm -f $lock
 while read src
 do
+	case $src in
+	"temp "*)
+		TEMP=${src#temp }
+		tmpdir=$TEMP
+		if ! [ -d "$TEMP" ]
+		then
+			mkdir -p "$TEMP"
+		else
+			rm -f $TEMP/*
+		fi
+		lock=$tmpdir/nas.lock
+		progress=$tmpdir/nas.progress
+		continue
+		;;
+	esac
+
 	case "${src,,}" in
 	""|"#"*)
 		# Leerzeilen und Kommentare ignorieren
@@ -448,10 +463,18 @@ do
 			echo "$P: Bestimme unkomprimierte Gesamtgröße"
 
 			S=0
+			slc=0
 			while read file
 			do
-				if [ "$file" = "exit" ] || [ "$file" = "slot" ]; then
+				if [ "$file" = "exit" ]; then
 					break
+				elif [ "$file" = "slot" ]; then
+					if [ $jobi -eq $slc ]; then
+						break
+					elif [ $jobi -gt $slc ]; then
+						(( ++slc ))
+						S=0
+					fi
 				elif ! [ -f "$file" -a -r "$file" ]; then
 					continue
 				fi
@@ -508,6 +531,7 @@ EOF
 	esac
 
 	process
+	final
 
 	case $src in
 	PG:*)
@@ -853,18 +877,6 @@ EOF
 		rund postupdate
 		popd >|/dev/null
 
-		continue
-		;;
-
-	"temp "*)
-		TEMP=${src#temp }
-		tmpdir=$TEMP
-		if ! [ -d "$TEMP" ]
-		then
-			mkdir -p "$TEMP"
-		else
-			rm -f $TEMP/*
-		fi
 		continue
 		;;
 
