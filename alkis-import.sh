@@ -112,21 +112,6 @@ log() {
 }
 export -f log
 
-lock() {
-	for i in $(seq 10); do
-		echo $$ 2>|/dev/null >$lock && return 0
-		sleep 0.1
-	done
-	echo "$(bdate): lock failed"
-	return 1
-}
-export -f lock
-
-unlock() {
-	rm -f $lock
-}
-export -f unlock
-
 rund() {
 	local dir=$1
 
@@ -221,7 +206,7 @@ import() {
 
 	s=$(stat -c %s "$dst")
 
-	echo "IMPORT (Slot: $jobi) $(bdate): $dst $(memunits $s)"
+	echo "IMPORT (Slot:$slc\/%slc_max) $(bdate): $dst $(memunits $s)"
 
 	if [ -n "$sfre" ] && eval [[ "$src" =~ "$sfre" ]]; then
 		echo "WARNING: Importfehler werden ignoriert"
@@ -308,7 +293,7 @@ progress() {
 	local remaining_size
 	local errors=0
 
-	lock
+	(flock 9
 	[ -f $progress ] && . $progress
 
 	start_time=${start_time:-$t0}
@@ -349,31 +334,35 @@ progress() {
 		echo "TIME: $file mit $(memunits $size) in 0,nichts importiert."
 	fi
 
-	cat <<EOF >|$progress
-start_time=$start_time
-total_size=$total_size
-remaining_size=$remaining_size
-last_time=$t1
-errors=$errors
-quittierungsnr=$quittierungsnr
-quittierungsi=$quittierungsi
-EOF
-
-	unlock
+	cat <<-EOF >|$progress
+	start_time=$start_time
+	total_size=$total_size
+	remaining_size=$remaining_size
+	last_time=$t1
+	errors=$errors
+	quittierungsnr=$quittierungsnr
+	quittierungsi=$quittierungsi
+	EOF
+	) 9< $lock
 }
 export -f progress
 
 final() {
-	lock
+	(flock 9
 	start_time=0
 	last_time=0
 	! [ -f $progress ] || . $progress
 	total_elapsed=$(( last_time - start_time ))
 	if (( total_elapsed > 0 )); then
-		echo "FINAL (Slot: $jobi): $(memunits $total_size) in $(timeunits $start_time $last_time) ($(memunits $(( total_size / total_elapsed )))/s)"
+		if [ $slc -eq $slc_max ]; then
+			final="XFINAL"
+		else
+			final="FINAL"
+		fi
+		echo "$final (Slot:$slc\/$slc_max): $(memunits $total_size) in $(timeunits $start_time $last_time) ($(memunits $(( total_size / total_elapsed )))/s)"
 	fi
 	rm -f $progress
-	unlock
+	) 9< $lock
 }
 
 export LC_CTYPE=de_DE.UTF-8
@@ -427,12 +416,15 @@ opt=
 log=
 preprocessed=0
 sfre=
+slot_token="<new-slot>"
 
 export job=
 export tmpdir=
 export lock=
 export progress=
-export jobi=0
+export jobi=1
+export slc=$jobi
+export slc_max=$(grep -c "$slot_token" "$F")
 
 while read src
 do
@@ -444,9 +436,10 @@ do
 		then
 			mkdir -p "$TEMP"
 		else
-			rm -f $TEMP/*
+			rm -f "$TEMP/*"
 		fi
 		lock=$tmpdir/nas.lock
+		touch "$lock"
 		progress=$tmpdir/nas.progress
 		continue
 		;;
@@ -460,15 +453,15 @@ do
 
 	*.zip|*.xml.gz|*.xml)
 		if [ -z "$job" ]; then
-			echo "$P: Bestimme unkomprimierte Gesamtgröße"
+			echo "$P: Bestimme unkomprimierte Gesamtgröße für Slot $jobi"
 
 			S=0
-			slc=0
+			slc=1
 			while read file
 			do
 				if [ "$file" = "exit" ]; then
 					break
-				elif [ "$file" = "slot" ]; then
+				elif [ "$file" = "$slot_token" ]; then
 					if [ $jobi -eq $slc ]; then
 						break
 					elif [ $jobi -gt $slc ]; then
@@ -513,16 +506,16 @@ do
 				(( S += s )) || true
 			done <"$F"
 
-			cat <<EOF >|$progress
-total_size=$S
-remaining_size=$S
-EOF
+			cat <<-EOF >|$progress
+			total_size=$S
+			remaining_size=$S
+			EOF
 
 			if (( S > 0 )); then
 				echo "$P: Unkomprimierte Gesamtgröße: $(memunits $S)"
 			fi
 
-			export job=$tmpdir/$(( ++jobi )).lst
+			export job=$tmpdir/$(( jobi++ )).lst
 		fi
 
 		echo $src >>$job
@@ -613,8 +606,6 @@ EOF
 			if [ $n -eq 0 ]; then
 				psql -X -q -c "CREATE TABLE $SCHEMAI.alkis_importlog(n SERIAL PRIMARY KEY, ts timestamp default now(), msg text)" "$DB"
 			fi
-
-			unlock
 
 			local log=$1
 			export log
@@ -927,15 +918,11 @@ EOF
 		else
 			src=${src#log }
 		fi
-
 		log=$(bdate +$src)
 
 		echo "LOGGING TO $log $(bdate)"
-		lock
 		exec 3>&1 4>&2 > >(log $log) 2>&1
-		lock
-		unlock
-
+		
 		echo "LOG $(bdate)"
 		if ! [ -e "$B/.git" ]; then
 			echo 'Import-Version: $Format:%h$'
