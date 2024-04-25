@@ -206,7 +206,7 @@ import() {
 
 	s=$(stat -c %s "$dst")
 
-	echo "IMPORT (Slot:$slc\/%slc_max) $(bdate): $dst $(memunits $s)"
+	echo "IMPORT (Slot:$slc/$slc_max) $(bdate): $dst $(memunits $s)"
 
 	if [ -n "$sfre" ] && eval [[ "$src" =~ "$sfre" ]]; then
 		echo "WARNING: Importfehler werden ignoriert"
@@ -281,6 +281,7 @@ process() {
 }
 
 progress() {
+	flock $lfd
 	local file=$1
 	local dst=$2
 	local size=$3
@@ -293,7 +294,6 @@ progress() {
 	local remaining_size
 	local errors=0
 
-	(flock 9
 	[ -f $progress ] && . $progress
 
 	start_time=${start_time:-$t0}
@@ -343,12 +343,13 @@ progress() {
 	quittierungsnr=$quittierungsnr
 	quittierungsi=$quittierungsi
 	EOF
-	) 9< $lock
+
+	flock -u $lfd
 }
 export -f progress
 
 final() {
-	(flock 9
+	flock $lfd
 	start_time=0
 	last_time=0
 	! [ -f $progress ] || . $progress
@@ -359,10 +360,10 @@ final() {
 		else
 			final="FINAL"
 		fi
-		echo "$final (Slot:$slc\/$slc_max): $(memunits $total_size) in $(timeunits $start_time $last_time) ($(memunits $(( total_size / total_elapsed )))/s)"
+		echo "$final (Slot:$slc/$slc_max): $(memunits $total_size) in $(timeunits $start_time $last_time) ($(memunits $(( total_size / total_elapsed )))/s)"
 	fi
 	rm -f $progress
-	) 9< $lock
+	flock -u $lfd
 }
 
 export LC_CTYPE=de_DE.UTF-8
@@ -423,8 +424,9 @@ export tmpdir=
 export lock=
 export progress=
 export jobi=1
-export slc=$jobi
+export slc=1
 export slc_max=$(grep -c "$slot_token" "$F")
+export lfd=
 
 while read src
 do
@@ -440,6 +442,7 @@ do
 		fi
 		lock=$tmpdir/nas.lock
 		touch "$lock"
+		exec {lfd}<"$lock"
 		progress=$tmpdir/nas.progress
 		continue
 		;;
@@ -523,10 +526,12 @@ do
 		;;
 	esac
 
-	process
-	final
-
 	case $src in
+	$slot_token)
+		process
+		final
+		continue
+		;;
 	PG:*)
 		DST=$src
 		DB=${src#PG:}
@@ -977,10 +982,6 @@ do
 
 	esac
 done <"$F"
-
-process
-
-final
 
 if [ "$src" = "error" ]; then
 	echo "FEHLER BEIM IMPORT"
