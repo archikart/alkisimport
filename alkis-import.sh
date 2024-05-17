@@ -229,7 +229,7 @@ import() {
 	local r=$?
 	t1=$(bdate +%s)
 
-	progress "$dst" "$dst1" $s $t0 $t1 $r
+	(flock 11; progress "$dst" "$dst1" $s $t0 $t1 $r) 11<"$lock"
 
 	[ $rm == 1 ] && rm -fv "$dst"
 	trap "" EXIT
@@ -281,7 +281,6 @@ process() {
 }
 
 progress() {
-	flock $lfd
 	local file=$1
 	local dst=$2
 	local size=$3
@@ -343,13 +342,10 @@ progress() {
 	quittierungsnr=$quittierungsnr
 	quittierungsi=$quittierungsi
 	EOF
-
-	flock -u $lfd
 }
 export -f progress
 
 final() {
-	flock $lfd
 	start_time=0
 	last_time=0
 	! [ -f $progress ] || . $progress
@@ -363,7 +359,6 @@ final() {
 		echo "$final (Slot:$slc/$slc_max): $(memunits $total_size) in $(timeunits $start_time $last_time) ($(memunits $(( total_size / total_elapsed )))/s)"
 	fi
 	rm -f $progress
-	flock -u $lfd
 }
 
 export LC_CTYPE=de_DE.UTF-8
@@ -426,7 +421,6 @@ export progress=
 export jobi=1
 export slc=1
 export slc_max=$(grep -c "$slot_token" "$F")
-export lfd=
 
 while read src
 do
@@ -442,7 +436,6 @@ do
 		fi
 		lock=$tmpdir/nas.lock
 		touch "$lock"
-		exec {lfd}<"$lock"
 		progress=$tmpdir/nas.progress
 		continue
 		;;
