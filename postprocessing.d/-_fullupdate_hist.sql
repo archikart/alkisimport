@@ -42,7 +42,7 @@ BEGIN
             ON c.table_schema = a.table_schema 
             AND c.table_name = a.table_name
             AND c.table_type = ''BASE TABLE''
-            WHERE a.table_schema = ''public''
+            WHERE a.table_schema = ''archikart''
             AND substr(a.table_name, 1, 3) IN (''ax_'', ''ap_'', ''ln_'', ''lb_'', ''au_'', ''aa_'')
             AND a.column_name = ''gml_id''
             ORDER BY a.table_name';
