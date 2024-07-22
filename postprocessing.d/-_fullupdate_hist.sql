@@ -66,11 +66,19 @@ BEGIN
                         FROM %I.%I a
                         LEFT JOIN %I.%I b
                         ON b.featureid = a.gml_id
+                        LEFT JOIN %I.%I c
+                        ON c.featureid = a.gml_id
+                        LEFT JOIN %I.%I d
+                        ON d.featureid = a.gml_id
                         WHERE a.beginnt <= %L
                         AND a.endet IS NULL
-                        AND b.id IS NULL',
+                        AND b.id IS NULL
+                        AND c.id IS NULL
+                        AND d.ogc_fid IS NULL',
                        table_schema,table_name,
                        table_schema,'alkis_komplettupdate',
+                       table_schema,'alkis_insert',
+                       table_schema,'delete',
                        impdate)
       LOOP
         featureid := tabledata.gml_id || translate(tabledata.beginnt,':-','');
