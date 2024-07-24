@@ -932,6 +932,7 @@ do
 			fi
 		fi
 		echo "GDAL-Version: $GDAL_VERSION"
+		echo "CPU-Kerne: $(nproc)"
 
 		continue
 		;;
