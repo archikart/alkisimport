@@ -35,13 +35,17 @@ BEGIN
     sql := 'SELECT a.table_schema, a.table_name
             FROM information_schema.columns a
             JOIN information_schema.columns b
-            ON a.table_schema = b.table_schema
-            AND a.table_name = b.table_name
+            ON b.table_schema = a.table_schema
+            AND b.table_name = a.table_name
             AND b.column_name = ''beginnt''
-            JOIN information_schema.tables c
-            ON c.table_schema = a.table_schema 
+            JOIN information_schema.columns c
+            ON c.table_schema = a.table_schema
             AND c.table_name = a.table_name
-            AND c.table_type = ''BASE TABLE''
+            AND c.column_name = ''endet''
+            JOIN information_schema.tables d
+            ON d.table_schema = a.table_schema 
+            AND d.table_name = a.table_name
+            AND d.table_type = ''BASE TABLE''
             WHERE a.table_schema = ''archikart''
             AND substr(a.table_name, 1, 3) IN (''ax_'', ''ap_'', ''ln_'', ''lb_'', ''au_'', ''aa_'')
             AND a.column_name = ''gml_id''
