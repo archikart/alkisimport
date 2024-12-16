@@ -63,7 +63,7 @@ AS $$
 DECLARE
   fs_ff_umfang float;
 BEGIN
-  EXECUTE format('SELECT st_perimeter2d(st_difference(max(f.wkb_geometry),st_union(st_intersection(f.wkb_geometry,j.wkb_geometry))))
+  EXECUTE format('SELECT st_perimeter2d(st_difference(max(f.wkb_geometry),st_makevalid(st_union(st_intersection(f.wkb_geometry,j.wkb_geometry)))))
                   FROM ax_flurstueck f
                   JOIN %I j
                   ON f.wkb_geometry && j.wkb_geometry
