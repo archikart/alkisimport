@@ -1,3 +1,9 @@
+\unset ON_ERROR_STOP
+SET client_min_messages TO notice;
+\set ON_ERROR_STOP
+
+SET search_path = :"alkis_schema", :"postgis_schema", public;
+
 SELECT alkis_dropobject('ak_fs_fuellfl_umfang_klass');
 CREATE TABLE ak_fs_fuellfl_umfang_klass (
 	fs_gml_id character(16),
