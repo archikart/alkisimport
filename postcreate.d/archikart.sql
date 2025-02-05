@@ -18,7 +18,7 @@ CREATE TABLE ak_fs_fuellfl_umfang_nutz_klass (
 	primary key (fs_gml_id)
 );
 COMMENT ON TABLE ak_fs_fuellfl_umfang_nutz_klass IS 'ARCHIKART: Füllflächenumfang Flurstücke - K0003AXAbschnittNK';
-CREATE INDEX ak_fs_fuellfl_umfang_klass_idx1 ON ak_fs_fuellfl_umfang_klass(fs_gml_id);
+CREATE INDEX ak_fs_fuellfl_umfang_nutz_klass_idx1 ON ak_fs_fuellfl_umfang_klass(fs_gml_id);
 
 SELECT alkis_dropobject('ak_fs_fuellfl_umfang_nutz');
 CREATE TABLE ak_fs_fuellfl_umfang_nutz(
