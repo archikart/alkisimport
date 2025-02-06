@@ -48,10 +48,11 @@ BEGIN
   ELSE
     EXECUTE format('SELECT COUNT(*)
                     FROM %I.%I
-                    WHERE GML_ID=%L',
+                    WHERE gml_id=%L
+                    AND endet IS NULL',
                     TG_TABLE_SCHEMA,TG_TABLE_NAME,
                     NEW.GML_ID)
-                    INTO I;
+                    INTO i;
     
     IF ku THEN
       IF i > 0 THEN
@@ -60,7 +61,7 @@ BEGIN
                         VALUES (%L, %L, %L, %L, %L, %L)',
                         TG_TABLE_SCHEMA,'delete',
                         TG_TABLE_NAME,NEW.gml_id,'update','false',fid,NEW.beginnt);
-      END IF;                
+      END IF;
     END IF;
     
     IF i = 0 THEN
