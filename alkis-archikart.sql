@@ -42,38 +42,13 @@ AS $$
 DECLARE
   fs_ff_geom geometry;
 BEGIN
-  EXECUTE format('SELECT st_difference(max(f.wkb_geometry),st_union(st_intersection(f.wkb_geometry,j.wkb_geometry)))
-                  FROM ax_flurstueck f
-                  JOIN %I j
-                  ON f.wkb_geometry && j.wkb_geometry
-                  AND st_relate(f.wkb_geometry,j.wkb_geometry,%L)
-                  WHERE f.endet IS NULL
-                  AND f.gml_id = %L',
-                 join_table,'2********',fs_id)
+  EXECUTE format('SELECT wkb_geometry
+                  FROM %I
+                  WHERE fs_gml_id = %L',
+                 join_table,fs_id)
   INTO fs_ff_geom;
   
   RETURN fs_ff_geom;
-END;
-$$ SET search_path TO archikart, public;
-
-CREATE OR REPLACE function alkis_fs_fuellfl_umfang(fs_id varchar, join_table varchar) RETURNS float
-LANGUAGE plpgsql
-STABLE
-AS $$
-DECLARE
-  fs_ff_umfang float;
-BEGIN
-  EXECUTE format('SELECT st_perimeter2d(st_difference(max(f.wkb_geometry),st_makevalid(st_union(st_intersection(f.wkb_geometry,j.wkb_geometry)))))
-                  FROM ax_flurstueck f
-                  JOIN %I j
-                  ON f.wkb_geometry && j.wkb_geometry
-                  AND st_relate(f.wkb_geometry,j.wkb_geometry,%L)
-                  WHERE f.endet IS NULL
-                  AND f.gml_id = %L',
-                 join_table,'2********',fs_id)
-  INTO fs_ff_umfang;
-  
-  RETURN fs_ff_umfang;
 END;
 $$ SET search_path TO archikart, public;
 
@@ -85,14 +60,12 @@ DECLARE
   ab_geom geometry;
 BEGIN
   EXECUTE format('SELECT st_intersection(f.wkb_geometry,j.wkb_geometry)
-                  FROM ax_flurstueck f
-                  JOIN %I j
-                  ON f.wkb_geometry && j.wkb_geometry
-                  AND st_relate(f.wkb_geometry,j.wkb_geometry,%L)
+                  FROM ax_flurstueck f,
+                  %I j
                   WHERE f.endet IS NULL
                   AND f.gml_id = %L
                   AND j.gml_id = %L',
-                 join_table,'2********',fs_id,ab_id)
+                 join_table,fs_id,ab_id)
   INTO ab_geom;
   
   RETURN ab_geom;
